@@ -22,6 +22,7 @@ namespace Image_Tagger
     {
         private List<PictureRecord> records;
         public ReadOnlyCollection<PictureRecord> PictureRecords;
+        public HashSet<string> AllTags;
 
         public Database()
         {
@@ -41,19 +42,21 @@ namespace Image_Tagger
 
         public void LoadRecords(string path)
         {
-            HashSet<string> foundTags = new HashSet<string>();
+            AllTags = new HashSet<string>();
 
             XElement root = XElement.Load(path);
             foreach (var record in root.Elements())
             {
-                PictureRecord newRecord = new PictureRecord();
-                newRecord.guid = Guid.Parse(record.Attribute("GUID").Value);
-                newRecord.fileLocation = record.Element("FileURI").Value;
-                newRecord.tags = new HashSet<string>();
+                PictureRecord newRecord = new PictureRecord
+                {
+                    guid = Guid.Parse(record.Attribute("GUID").Value),
+                    fileLocation = record.Element("FileURI").Value,
+                    tags = new HashSet<string>()
+                };
                 foreach (var tag in record.Element("Tags").Elements())
                 {
-                    foundTags.Add(tag.Value);
-                    newRecord.tags.Add(tag.Value);
+                    AllTags.Add(tag.Value.ToLowerInvariant());
+                    newRecord.tags.Add(tag.Value.ToLowerInvariant());
                 }
                 records.Add(newRecord);
             }

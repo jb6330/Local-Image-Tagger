@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.ImageSelector = new System.Windows.Forms.FlowLayoutPanel();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.SearchBox = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // ImageSelector
@@ -47,11 +48,22 @@
             this.imageList1.ImageSize = new System.Drawing.Size(16, 16);
             this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
             // 
+            // SearchBox
+            // 
+            this.SearchBox.DetectUrls = false;
+            this.SearchBox.Dock = System.Windows.Forms.DockStyle.Top;
+            this.SearchBox.Location = new System.Drawing.Point(0, 0);
+            this.SearchBox.Name = "SearchBox";
+            this.SearchBox.Size = new System.Drawing.Size(800, 22);
+            this.SearchBox.TabIndex = 0;
+            this.SearchBox.Text = "Sample Text";
+            // 
             // PictureViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.SearchBox);
             this.Controls.Add(this.ImageSelector);
             this.Name = "PictureViewer";
             this.Text = "Image Tagger";
@@ -63,6 +75,7 @@
 
         private System.Windows.Forms.FlowLayoutPanel ImageSelector;
         private System.Windows.Forms.ImageList imageList1;
+        private System.Windows.Forms.RichTextBox SearchBox;
     }
 }
 
