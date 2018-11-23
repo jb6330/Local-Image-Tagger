@@ -104,5 +104,32 @@ namespace Image_Tagger
             }
             return output.ToArray();
         }
+
+        public bool SolveEquation(string[] equation, HashSet<string> tags)
+        {
+            Stack<bool> buffer = new Stack<bool>();
+            foreach(string entry in equation){
+                switch (entry)
+                {
+                    case "NOT":
+                        buffer.Push(!buffer.Pop());
+                        break;
+                    case "AND":
+                        buffer.Push(buffer.Pop() && buffer.Pop());
+                        break;
+                    case "OR":
+                        buffer.Push(buffer.Pop() || buffer.Pop());
+                        break;
+                    default:
+                        buffer.Push(tags.Contains(entry));
+                        break;
+                }
+            }
+            if(buffer.Count != 1)
+            {
+                throw new ArgumentException("Invalid equation");
+            }
+            return buffer.Pop();
+        }
     }
 }
