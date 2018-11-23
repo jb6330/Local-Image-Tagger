@@ -63,7 +63,7 @@ namespace Image_Tagger
                         operatorStack.Push(OperatorTypes.OpenBracket);
                         break;
                     case ")":
-                        output.Add(newTerm.Trim());
+                        if (newTerm != "") { output.Add(newTerm.Trim().ToLowerInvariant()); }
                         newTerm = "";
                         while (operatorStack.Count > 0 && operatorStack.Peek() != OperatorTypes.OpenBracket)
                         {
@@ -76,13 +76,13 @@ namespace Image_Tagger
                         operatorStack.Push(OperatorTypes.NOT);
                         break;
                     case "AND":
-                        output.Add(newTerm.Trim());
+                        if (newTerm != "") { output.Add(newTerm.Trim().ToLowerInvariant()); }
                         newTerm = "";
                         while (operatorStack.Count > 0 && operatorStack.Peek() == OperatorTypes.NOT) { output.Add(operatorStack.Pop().ToString()); }
                         operatorStack.Push(OperatorTypes.AND);
                         break;
                     case "OR":
-                        output.Add(newTerm.Trim());
+                        if (newTerm != "") { output.Add(newTerm.Trim().ToLowerInvariant()); }
                         newTerm = "";
                         while (operatorStack.Count > 0 && operatorStack.Peek() == OperatorTypes.NOT) { output.Add(operatorStack.Pop().ToString()); }
                         operatorStack.Push(OperatorTypes.OR);
@@ -96,7 +96,7 @@ namespace Image_Tagger
             }
             if(newTerm != "")
             {
-                output.Add(newTerm.Trim());
+                output.Add(newTerm.Trim().ToLowerInvariant());
             }
             while (operatorStack.Count > 0)
             {
@@ -108,17 +108,22 @@ namespace Image_Tagger
         public bool SolveEquation(string[] equation, HashSet<string> tags)
         {
             Stack<bool> buffer = new Stack<bool>();
-            foreach(string entry in equation){
+            bool operand1, operand2;
+            foreach (string entry in equation){
                 switch (entry)
                 {
                     case "NOT":
                         buffer.Push(!buffer.Pop());
                         break;
                     case "AND":
-                        buffer.Push(buffer.Pop() && buffer.Pop());
+                        operand1 = buffer.Pop();
+                        operand2 = buffer.Pop();
+                        buffer.Push(operand1 && operand2);
                         break;
                     case "OR":
-                        buffer.Push(buffer.Pop() || buffer.Pop());
+                        operand1 = buffer.Pop();
+                        operand2 = buffer.Pop();
+                        buffer.Push(operand1 || operand2);
                         break;
                     default:
                         buffer.Push(tags.Contains(entry));
@@ -130,6 +135,32 @@ namespace Image_Tagger
                 throw new ArgumentException("Invalid equation");
             }
             return buffer.Pop();
+        }
+
+        // TODO: split this off into a separate thread
+        private void search(string text)
+        {
+            string[] equation = ConvertToReversePolishNotation(text);
+            foreach (var entry in database.PictureRecords)
+            {
+                bool displayed = SolveEquation(equation, entry.tags);
+                
+                displayedPictures[entry].Invoke((Action)(() => displayedPictures[entry].Visible = displayed));
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            search(SearchBox.Text);
+        }
+
+        private void SearchBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                search(SearchBox.Text);
+            }
         }
     }
 }
