@@ -34,17 +34,25 @@
             this.SearchBox = new System.Windows.Forms.RichTextBox();
             this.SearchControls = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addPictureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.saveChangesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SearchControls.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // ImageSelector
             // 
+            this.ImageSelector.AutoScroll = true;
             this.ImageSelector.AutoSize = true;
             this.ImageSelector.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ImageSelector.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ImageSelector.Location = new System.Drawing.Point(0, 23);
+            this.ImageSelector.Location = new System.Drawing.Point(0, 47);
             this.ImageSelector.Name = "ImageSelector";
-            this.ImageSelector.Size = new System.Drawing.Size(861, 479);
+            this.ImageSelector.Size = new System.Drawing.Size(861, 455);
             this.ImageSelector.TabIndex = 0;
             // 
             // imageList1
@@ -71,7 +79,7 @@
             this.SearchControls.Controls.Add(this.SearchBox);
             this.SearchControls.Controls.Add(this.button1);
             this.SearchControls.Dock = System.Windows.Forms.DockStyle.Top;
-            this.SearchControls.Location = new System.Drawing.Point(0, 0);
+            this.SearchControls.Location = new System.Drawing.Point(0, 24);
             this.SearchControls.Name = "SearchControls";
             this.SearchControls.Size = new System.Drawing.Size(861, 23);
             this.SearchControls.TabIndex = 1;
@@ -87,6 +95,53 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(861, 24);
+            this.menuStrip1.TabIndex = 0;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // fileToolStripMenuItem
+            // 
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addPictureToolStripMenuItem,
+            this.addFolderToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.saveChangesToolStripMenuItem});
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Text = "File";
+            // 
+            // addPictureToolStripMenuItem
+            // 
+            this.addPictureToolStripMenuItem.Name = "addPictureToolStripMenuItem";
+            this.addPictureToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addPictureToolStripMenuItem.Text = "Add Picture";
+            this.addPictureToolStripMenuItem.Click += new System.EventHandler(this.addPictureToolStripMenuItem_Click);
+            // 
+            // addFolderToolStripMenuItem
+            // 
+            this.addFolderToolStripMenuItem.Name = "addFolderToolStripMenuItem";
+            this.addFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addFolderToolStripMenuItem.Text = "Add Folder";
+            this.addFolderToolStripMenuItem.Click += new System.EventHandler(this.addFolderToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            // 
+            // saveChangesToolStripMenuItem
+            // 
+            this.saveChangesToolStripMenuItem.Name = "saveChangesToolStripMenuItem";
+            this.saveChangesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveChangesToolStripMenuItem.Text = "Save Changes";
+            this.saveChangesToolStripMenuItem.Click += new System.EventHandler(this.saveChangesToolStripMenuItem_Click);
+            // 
             // PictureViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -94,9 +149,13 @@
             this.ClientSize = new System.Drawing.Size(861, 502);
             this.Controls.Add(this.ImageSelector);
             this.Controls.Add(this.SearchControls);
+            this.Controls.Add(this.menuStrip1);
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "PictureViewer";
             this.Text = "Image Tagger";
             this.SearchControls.ResumeLayout(false);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -109,6 +168,12 @@
         private System.Windows.Forms.RichTextBox SearchBox;
         private System.Windows.Forms.Panel SearchControls;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addPictureToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem saveChangesToolStripMenuItem;
     }
 }
 

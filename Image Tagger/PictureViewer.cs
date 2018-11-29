@@ -30,17 +30,22 @@ namespace Image_Tagger
             InitializeComponent();
             database = new Database();
             displayedPictures = new Dictionary<PictureRecord, PictureBox>();
-            foreach(var record in database.PictureRecords)
+            foreach (var record in database.PictureRecords)
             {
-                PictureBox pictureBox = new PictureBox
-                {
-                    SizeMode = PictureBoxSizeMode.Zoom,
-                    ImageLocation = record.fileLocation,
-                    Size = new Size(300, 300)
-                };
-                ImageSelector.Controls.Add(pictureBox);
-                displayedPictures.Add(record, pictureBox);
+                AddRecord(record);
             }
+        }
+
+        private void AddRecord(PictureRecord record)
+        {
+            PictureBox pictureBox = new PictureBox
+            {
+                SizeMode = PictureBoxSizeMode.Zoom,
+                ImageLocation = record.fileLocation,
+                Size = new Size(300, 300)
+            };
+            ImageSelector.Controls.Add(pictureBox);
+            displayedPictures.Add(record, pictureBox);
         }
 
         public static string[] ConvertToReversePolishNotation(string equation)
@@ -54,7 +59,7 @@ namespace Image_Tagger
             string[] terms = cleanedString.Split(' ');
 
             string newTerm = "";
-            foreach(string term in terms)
+            foreach (string term in terms)
             {
                 switch (term)
                 {
@@ -72,7 +77,7 @@ namespace Image_Tagger
                         operatorStack.Pop();
                         break;
                     case "NOT":
-                        if(newTerm != "") { throw new InvalidOperationException("NOT operater found directly following term"); }
+                        if (newTerm != "") { throw new InvalidOperationException("NOT operater found directly following term"); }
                         operatorStack.Push(OperatorTypes.NOT);
                         break;
                     case "AND":
@@ -94,7 +99,7 @@ namespace Image_Tagger
                         break;
                 }
             }
-            if(newTerm != "")
+            if (newTerm != "")
             {
                 output.Add(newTerm.Trim().ToLowerInvariant());
             }
@@ -109,7 +114,7 @@ namespace Image_Tagger
         {
             Stack<bool> buffer = new Stack<bool>();
             bool operand1, operand2;
-            foreach (string entry in equation){
+            foreach (string entry in equation) {
                 switch (entry)
                 {
                     case "NOT":
@@ -130,7 +135,7 @@ namespace Image_Tagger
                         break;
                 }
             }
-            if(buffer.Count != 1)
+            if (buffer.Count != 1)
             {
                 throw new ArgumentException("Invalid equation");
             }
@@ -140,27 +145,78 @@ namespace Image_Tagger
         // TODO: split this off into a separate thread
         private void search(string text)
         {
+            if(text.Trim() == string.Empty)
+            {
+                foreach (var entry in database.PictureRecords)
+                {
+                    displayedPictures[entry].Invoke((Action)(() => displayedPictures[entry].Visible = true));
+                }
+            }
             string[] equation = ConvertToReversePolishNotation(text);
             foreach (var entry in database.PictureRecords)
             {
                 bool displayed = SolveEquation(equation, entry.tags);
-                
-                displayedPictures[entry].Invoke((Action)(() => displayedPictures[entry].Visible = displayed));
+
+                displayedPictures[entry].Invoke((Action)(
+                    () => {
+                        if (displayedPictures[entry].Visible != displayed)
+                        {
+                            displayedPictures[entry].Visible = displayed;
+                        }
+                    }));
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs eventArgs)
         {
             search(SearchBox.Text);
         }
 
-        private void SearchBox_KeyDown(object sender, KeyEventArgs e)
+        private void SearchBox_KeyDown(object sender, KeyEventArgs eventArgs)
         {
-            if(e.KeyCode == Keys.Enter)
+            if (eventArgs.KeyCode == Keys.Enter)
             {
-                e.Handled = true;
+                eventArgs.Handled = true;
                 search(SearchBox.Text);
             }
+        }
+
+        private void addPictureToolStripMenuItem_Click(object sender, EventArgs eventArgs)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.CheckFileExists = true;
+            if(dialog.ShowDialog() == DialogResult.OK && dialog.FileName.Trim() != string.Empty)
+            {
+                try
+                {
+                    var record = database.AddPicture(dialog.FileName);
+                    AddRecord(record);
+                }
+                catch(Exception e)
+                {
+                    // todo: log exception
+                }
+            }
+        }
+
+        private void addFolderToolStripMenuItem_Click(object sender, EventArgs eventArgs)
+        {
+            FolderBrowserDialog dialog = new FolderBrowserDialog();
+            if(dialog.ShowDialog() == DialogResult.OK && dialog.SelectedPath.Trim() != string.Empty)
+            {
+                database.AddFolder(dialog.SelectedPath);
+                displayedPictures.Clear();
+                ImageSelector.Controls.Clear();
+                foreach (var record in database.PictureRecords)
+                {
+                    AddRecord(record);
+                }
+            }
+        }
+
+        private void saveChangesToolStripMenuItem_Click(object sender, EventArgs eventArgs)
+        {
+            database.SaveRecords();
         }
     }
 }
