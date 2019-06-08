@@ -1,53 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace Image_Tagger
+﻿namespace Image_Tagger
 {
-    enum OperatorTypes
-    {
-        NONE = 0,
-        AND,
-        OR,
-        NOT,
-        OpenBracket,
-        CloseBracket
-    }
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Data;
+    using System.Drawing;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using System.Windows.Forms;
 
+    /// <summary>A class that manages the display of the pictures.</summary>
     public partial class PictureViewer : Form
     {
         private Database database;
         private Dictionary<PictureRecord, PictureBox> displayedPictures;
 
+        /// <summary>Initializes a new instance of the <see cref="PictureViewer"/> class.</summary>
         public PictureViewer()
         {
-            InitializeComponent();
-            database = new Database();
-            displayedPictures = new Dictionary<PictureRecord, PictureBox>();
-            foreach (var record in database.PictureRecords)
+            this.InitializeComponent();
+            this.database = new Database();
+            this.database.LoadRecords(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.xml"));
+            this.displayedPictures = new Dictionary<PictureRecord, PictureBox>();
+            foreach (var record in this.database.PictureRecords)
             {
-                AddRecord(record);
+                this.AddRecord(record);
             }
         }
 
-        private void AddRecord(PictureRecord record)
+        /// <summary>Operators that can be used in the search equation.</summary>
+        private enum OperatorTypes
         {
-            PictureBox pictureBox = new PictureBox
-            {
-                SizeMode = PictureBoxSizeMode.Zoom,
-                ImageLocation = record.fileLocation,
-                Size = new Size(300, 300)
-            };
-            ImageSelector.Controls.Add(pictureBox);
-            displayedPictures.Add(record, pictureBox);
+            NONE = 0,
+            AND,
+            OR,
+            NOT,
+            OpenBracket,
+            CloseBracket,
         }
 
+        /// <summary>Parses an equation into a list of terms and operators in Reverse Polish Notation.</summary>
+        /// <param name="equation">The equation to parse.</param>
+        /// <returns>The terms and operators in order of Reverse Polish Notation.</returns>
         public static string[] ConvertToReversePolishNotation(string equation)
         {
             List<string> output = new List<string>();
@@ -58,38 +54,67 @@ namespace Image_Tagger
             cleanedString = cleanedString.Replace(")", " ) ");
             string[] terms = cleanedString.Split(' ');
 
-            string newTerm = "";
+            string newTerm = string.Empty;
             foreach (string term in terms)
             {
                 switch (term)
                 {
                     case "(":
-                        if (newTerm != "") { throw new InvalidOperationException("( operater found directly following term"); }
+                        if (newTerm != string.Empty)
+                        {
+                            throw new InvalidOperationException("( operater found directly following term");
+                        }
+
                         operatorStack.Push(OperatorTypes.OpenBracket);
                         break;
                     case ")":
-                        if (newTerm != "") { output.Add(newTerm.Trim().ToLowerInvariant()); }
-                        newTerm = "";
+                        if (newTerm != string.Empty)
+                        {
+                            output.Add(newTerm.Trim().ToLowerInvariant());
+                        }
+
+                        newTerm = string.Empty;
                         while (operatorStack.Count > 0 && operatorStack.Peek() != OperatorTypes.OpenBracket)
                         {
                             output.Add(operatorStack.Pop().ToString());
                         }
+
                         operatorStack.Pop();
                         break;
                     case "NOT":
-                        if (newTerm != "") { throw new InvalidOperationException("NOT operater found directly following term"); }
+                        if (newTerm != string.Empty)
+                        {
+                            throw new InvalidOperationException("NOT operater found directly following term");
+                        }
+
                         operatorStack.Push(OperatorTypes.NOT);
                         break;
                     case "AND":
-                        if (newTerm != "") { output.Add(newTerm.Trim().ToLowerInvariant()); }
-                        newTerm = "";
-                        while (operatorStack.Count > 0 && operatorStack.Peek() == OperatorTypes.NOT) { output.Add(operatorStack.Pop().ToString()); }
+                        if (newTerm != string.Empty)
+                        {
+                            output.Add(newTerm.Trim().ToLowerInvariant());
+                        }
+
+                        newTerm = string.Empty;
+                        while (operatorStack.Count > 0 && operatorStack.Peek() == OperatorTypes.NOT)
+                        {
+                            output.Add(operatorStack.Pop().ToString());
+                        }
+
                         operatorStack.Push(OperatorTypes.AND);
                         break;
                     case "OR":
-                        if (newTerm != "") { output.Add(newTerm.Trim().ToLowerInvariant()); }
-                        newTerm = "";
-                        while (operatorStack.Count > 0 && operatorStack.Peek() == OperatorTypes.NOT) { output.Add(operatorStack.Pop().ToString()); }
+                        if (newTerm != string.Empty)
+                        {
+                            output.Add(newTerm.Trim().ToLowerInvariant());
+                        }
+
+                        newTerm = string.Empty;
+                        while (operatorStack.Count > 0 && operatorStack.Peek() == OperatorTypes.NOT)
+                        {
+                            output.Add(operatorStack.Pop().ToString());
+                        }
+
                         operatorStack.Push(OperatorTypes.OR);
                         break;
                     case "":
@@ -99,22 +124,30 @@ namespace Image_Tagger
                         break;
                 }
             }
-            if (newTerm != "")
+
+            if (newTerm != string.Empty)
             {
                 output.Add(newTerm.Trim().ToLowerInvariant());
             }
+
             while (operatorStack.Count > 0)
             {
                 output.Add(operatorStack.Pop().ToString());
             }
+
             return output.ToArray();
         }
 
+        /// <summary>Evaluate the equation on against a list of tags.</summary>
+        /// <param name="equation">The search equation to evaluate.</param>
+        /// <param name="tags">The list of tags that the image has.</param>
+        /// <returns>Whether or not the tags satisfy the search equation.</returns>
         public bool SolveEquation(string[] equation, HashSet<string> tags)
         {
             Stack<bool> buffer = new Stack<bool>();
             bool operand1, operand2;
-            foreach (string entry in equation) {
+            foreach (string entry in equation)
+            {
                 switch (entry)
                 {
                     case "NOT":
@@ -135,41 +168,57 @@ namespace Image_Tagger
                         break;
                 }
             }
+
             if (buffer.Count != 1)
             {
                 throw new ArgumentException("Invalid equation");
             }
+
             return buffer.Pop();
         }
 
-        // TODO: split this off into a separate thread
-        private void search(string text)
+        private void AddRecord(PictureRecord record)
         {
-            if(text.Trim() == string.Empty)
+            PictureBox pictureBox = new PictureBox
             {
-                foreach (var entry in database.PictureRecords)
+                SizeMode = PictureBoxSizeMode.Zoom,
+                ImageLocation = record.FileLocation,
+                Size = new Size(300, 300),
+            };
+            this.ImageSelector.Controls.Add(pictureBox);
+            this.displayedPictures.Add(record, pictureBox);
+        }
+
+        // TODO: split this off into a separate thread
+        private void Search(string text)
+        {
+            if (text.Trim() == string.Empty)
+            {
+                foreach (var entry in this.database.PictureRecords)
                 {
-                    displayedPictures[entry].Invoke((Action)(() => displayedPictures[entry].Visible = true));
+                    this.displayedPictures[entry].Invoke((Action)(() => this.displayedPictures[entry].Visible = true));
                 }
             }
-            string[] equation = ConvertToReversePolishNotation(text);
-            foreach (var entry in database.PictureRecords)
-            {
-                bool displayed = SolveEquation(equation, entry.tags);
 
-                displayedPictures[entry].Invoke((Action)(
-                    () => {
-                        if (displayedPictures[entry].Visible != displayed)
+            string[] equation = ConvertToReversePolishNotation(text);
+            foreach (var entry in this.database.PictureRecords)
+            {
+                bool displayed = this.SolveEquation(equation, entry.Tags);
+
+                this.displayedPictures[entry].Invoke((Action)(
+                    () =>
+                    {
+                        if (this.displayedPictures[entry].Visible != displayed)
                         {
-                            displayedPictures[entry].Visible = displayed;
+                            this.displayedPictures[entry].Visible = displayed;
                         }
                     }));
             }
         }
 
-        private void button1_Click(object sender, EventArgs eventArgs)
+        private void Button1_Click(object sender, EventArgs eventArgs)
         {
-            search(SearchBox.Text);
+            this.Search(this.SearchBox.Text);
         }
 
         private void SearchBox_KeyDown(object sender, KeyEventArgs eventArgs)
@@ -177,46 +226,46 @@ namespace Image_Tagger
             if (eventArgs.KeyCode == Keys.Enter)
             {
                 eventArgs.Handled = true;
-                search(SearchBox.Text);
+                this.Search(this.SearchBox.Text);
             }
         }
 
-        private void addPictureToolStripMenuItem_Click(object sender, EventArgs eventArgs)
+        private void AddPictureToolStripMenuItem_Click(object sender, EventArgs eventArgs)
         {
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.CheckFileExists = true;
-            if(dialog.ShowDialog() == DialogResult.OK && dialog.FileName.Trim() != string.Empty)
+            if (dialog.ShowDialog() == DialogResult.OK && dialog.FileName.Trim() != string.Empty)
             {
                 try
                 {
-                    var record = database.AddPicture(dialog.FileName);
-                    AddRecord(record);
+                    var record = this.database.AddPicture(dialog.FileName);
+                    this.AddRecord(record);
                 }
-                catch(Exception e)
+                catch (Exception)
                 {
                     // todo: log exception
                 }
             }
         }
 
-        private void addFolderToolStripMenuItem_Click(object sender, EventArgs eventArgs)
+        private void AddFolderToolStripMenuItem_Click(object sender, EventArgs eventArgs)
         {
             FolderBrowserDialog dialog = new FolderBrowserDialog();
-            if(dialog.ShowDialog() == DialogResult.OK && dialog.SelectedPath.Trim() != string.Empty)
+            if (dialog.ShowDialog() == DialogResult.OK && dialog.SelectedPath.Trim() != string.Empty)
             {
-                database.AddFolder(dialog.SelectedPath);
-                displayedPictures.Clear();
-                ImageSelector.Controls.Clear();
-                foreach (var record in database.PictureRecords)
+                this.database.AddFolder(dialog.SelectedPath);
+                this.displayedPictures.Clear();
+                this.ImageSelector.Controls.Clear();
+                foreach (var record in this.database.PictureRecords)
                 {
-                    AddRecord(record);
+                    this.AddRecord(record);
                 }
             }
         }
 
-        private void saveChangesToolStripMenuItem_Click(object sender, EventArgs eventArgs)
+        private void SaveChangesToolStripMenuItem_Click(object sender, EventArgs eventArgs)
         {
-            database.SaveRecords();
+            this.database.SaveRecords();
         }
     }
 }
