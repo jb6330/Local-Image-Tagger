@@ -17,16 +17,41 @@
         private ToolTip toolTip = new ToolTip();
         private Database database;
         private SearchFilter filter = new SearchFilter();
+        private ContextMenuStrip contextMenu;
+        private string contextMenuPath = string.Empty;
+
+        private Dictionary<PictureBox, PictureRecord> reverseLookup = new Dictionary<PictureBox, PictureRecord>();
 
         /// <summary>Initializes a new instance of the <see cref="PictureViewer"/> class.</summary>
         public PictureViewer()
         {
             this.InitializeComponent();
+
+            ToolStripMenuItem copyPath = new ToolStripMenuItem("Copy Path");
+            copyPath.Click += this.CopyPath_Click;
+            copyPath.Name = "CopyPath";
+
+            this.contextMenu = new ContextMenuStrip();
+            this.contextMenu.Opening += this.ContextMenu_Opening;
+            this.contextMenu.Items.Add(copyPath);
+
             this.database = new Database();
             this.database.LoadRecords(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.xml"));
             foreach (var record in this.database.PictureRecords)
             {
                 this.AddRecord(record);
+            }
+        }
+
+        private void ContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            if (this.contextMenu.SourceControl is PictureBox picture)
+            {
+                this.contextMenuPath = this.reverseLookup[picture].FileLocation;
+            }
+            else
+            {
+                e.Cancel = true;
             }
         }
 
@@ -39,14 +64,24 @@
                 Size = new Size(300, 300),
             };
 
+            pictureBox.ContextMenuStrip = this.contextMenu;
+
+            this.reverseLookup.Add(pictureBox, record);
+
             this.toolTip.SetToolTip(pictureBox, string.Join(", ", record.Tags.OrderBy(tag => tag)));
             this.ImageSelector.Controls.Add(pictureBox);
+        }
+
+        private void CopyPath_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetData(DataFormats.Text, this.contextMenuPath);
         }
 
         // TODO: split this off into a separate thread
         private void Search(string text)
         {
             this.ImageSelector.Controls.Clear();
+            this.reverseLookup.Clear();
             text = text.Trim();
 
             if (text == string.Empty)
@@ -105,6 +140,7 @@
             {
                 this.database.AddFolder(dialog.SelectedPath);
                 this.ImageSelector.Controls.Clear();
+                this.reverseLookup.Clear();
                 foreach (var record in this.database.PictureRecords)
                 {
                     this.AddRecord(record);
