@@ -14,6 +14,7 @@
     /// <summary>A class that manages the display of the pictures.</summary>
     public partial class PictureViewer : Form
     {
+        private ToolTip toolTip = new ToolTip();
         private Database database;
         private SearchFilter filter = new SearchFilter();
 
@@ -37,6 +38,8 @@
                 ImageLocation = record.FileLocation,
                 Size = new Size(300, 300),
             };
+
+            this.toolTip.SetToolTip(pictureBox, string.Join(", ", record.Tags.OrderBy(tag => tag)));
             this.ImageSelector.Controls.Add(pictureBox);
         }
 
