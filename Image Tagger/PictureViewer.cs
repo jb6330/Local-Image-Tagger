@@ -31,15 +31,36 @@
             copyPath.Click += this.CopyPath_Click;
             copyPath.Name = "CopyPath";
 
+            ToolStripMenuItem edit = new ToolStripMenuItem("Edit");
+            edit.Click += this.Edit_Click;
+            edit.Name = "Edit";
+
             this.contextMenu = new ContextMenuStrip();
             this.contextMenu.Opening += this.ContextMenu_Opening;
             this.contextMenu.Items.Add(copyPath);
+            this.contextMenu.Items.Add(edit);
 
             this.database = new Database();
             this.database.LoadRecords(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.xml"));
-            foreach (var record in this.database.PictureRecords)
+            foreach (var record in this.database.PictureRecords.Values)
             {
                 this.AddRecord(record);
+            }
+        }
+
+        private void Edit_Click(object sender, EventArgs e)
+        {
+            if (this.contextMenu.SourceControl is PictureBox picture)
+            {
+                Form popup = new Form();
+                RecordEditor editor = new RecordEditor();
+                editor.LoadRecord(this.reverseLookup[picture]);
+                editor.Dock = DockStyle.Fill;
+                popup.Controls.Add(editor);
+                popup.ShowDialog();
+                var newRecord = editor.GetChanges();
+                this.reverseLookup[picture] = newRecord;
+                this.database.UpdateRecord(newRecord);
             }
         }
 
@@ -86,14 +107,14 @@
 
             if (text == string.Empty)
             {
-                foreach (var entry in this.database.PictureRecords)
+                foreach (var entry in this.database.PictureRecords.Values)
                 {
                     this.AddRecord(entry);
                 }
             }
             else
             {
-                var records = this.filter.CreateFilteredList(this.database.PictureRecords.ToList(), text);
+                var records = this.filter.CreateFilteredList(this.database.PictureRecords.Values.ToList(), text);
                 foreach (var entry in records)
                 {
                     this.AddRecord(entry);
@@ -141,7 +162,7 @@
                 this.database.AddFolder(dialog.SelectedPath);
                 this.ImageSelector.Controls.Clear();
                 this.reverseLookup.Clear();
-                foreach (var record in this.database.PictureRecords)
+                foreach (var record in this.database.PictureRecords.Values)
                 {
                     this.AddRecord(record);
                 }

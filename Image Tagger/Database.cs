@@ -16,13 +16,13 @@
     {
         /// <summary>The list of all tags in the database.</summary>
         private HashSet<string> allTags;
-        private List<PictureRecord> records;
+        private Dictionary<Guid, PictureRecord> records;
 
         /// <summary>Initializes a new instance of the <see cref="Database"/> class.</summary>
         public Database()
         {
-            this.records = new List<PictureRecord>();
-            this.PictureRecords = this.records.AsReadOnly();
+            this.records = new Dictionary<Guid, PictureRecord>();
+            this.PictureRecords = new ReadOnlyDictionary<Guid, PictureRecord>(this.records);
             this.allTags = new HashSet<string>();
         }
 
@@ -34,7 +34,15 @@
         }
 
         /// <summary>Gets the records that the database has loaded.</summary>
-        public ReadOnlyCollection<PictureRecord> PictureRecords { get; private set; }
+        public ReadOnlyDictionary<Guid, PictureRecord> PictureRecords { get; private set; }
+
+        /// <summary>Updates the passed record.</summary>
+        /// <param name="record">The record to update.</param>
+        public void UpdateRecord(PictureRecord record)
+        {
+            this.records[record.Id] = record;
+            this.HasUnsavedChanges = true;
+        }
 
         /// <summary>Load a new set of records.</summary>
         /// <param name="path">The file to load the records from.</param>
@@ -56,7 +64,7 @@
                     newRecord.Tags.Add(tag.Value.ToLowerInvariant());
                 }
 
-                this.records.Add(newRecord);
+                this.records.Add(newRecord.Id, newRecord);
             }
         }
 
@@ -71,7 +79,7 @@
         internal void SaveRecords(string path)
         {
             XElement root = new XElement("Records");
-            foreach (PictureRecord record in this.records)
+            foreach (PictureRecord record in this.records.Values)
             {
                 XElement entry = new XElement("Record");
                 root.Add(entry);
@@ -87,6 +95,7 @@
             }
 
             root.Save(path);
+            this.HasUnsavedChanges = false;
         }
 
         /// <summary>Load a new picture.</summary>
@@ -99,9 +108,10 @@
                 throw new ArgumentException("File does not exists");
             }
 
-            if (this.records.Exists(record => record.FileLocation == fileName))
+            var previous = this.records.Values.Where(record => record.FileLocation == fileName);
+            if (previous.Count() > 0)
             {
-                return this.records.First(record => record.FileLocation == fileName);
+                return previous.First();
             }
 
             PictureRecord newRecord = new PictureRecord
@@ -111,7 +121,8 @@
                 Tags = new HashSet<string>(),
             };
 
-            this.records.Add(newRecord);
+            this.records.Add(newRecord.Id, newRecord);
+            this.HasUnsavedChanges = true;
             return newRecord;
         }
 

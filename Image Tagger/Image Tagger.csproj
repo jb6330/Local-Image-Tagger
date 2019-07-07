@@ -80,6 +80,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RecordEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="RecordEditor.Designer.cs">
+      <DependentUpon>RecordEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="SearchFilter.cs" />
     <EmbeddedResource Include="PictureViewer.resx">
       <DependentUpon>PictureViewer.cs</DependentUpon>
@@ -93,6 +99,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="RecordEditor.resx">
+      <DependentUpon>RecordEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
