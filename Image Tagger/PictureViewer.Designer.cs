@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.ImageSelector = new System.Windows.Forms.FlowLayoutPanel();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.SearchBox = new System.Windows.Forms.RichTextBox();
             this.SearchControls = new System.Windows.Forms.Panel();
@@ -40,20 +39,10 @@
             this.addFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.saveChangesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.paginatedView1 = new Image_Tagger.PaginatedView();
             this.SearchControls.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // ImageSelector
-            // 
-            this.ImageSelector.AutoScroll = true;
-            this.ImageSelector.AutoSize = true;
-            this.ImageSelector.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ImageSelector.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ImageSelector.Location = new System.Drawing.Point(0, 47);
-            this.ImageSelector.Name = "ImageSelector";
-            this.ImageSelector.Size = new System.Drawing.Size(861, 455);
-            this.ImageSelector.TabIndex = 0;
             // 
             // imageList1
             // 
@@ -119,35 +108,43 @@
             // addPictureToolStripMenuItem
             // 
             this.addPictureToolStripMenuItem.Name = "addPictureToolStripMenuItem";
-            this.addPictureToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addPictureToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.addPictureToolStripMenuItem.Text = "Add Picture";
             this.addPictureToolStripMenuItem.Click += new System.EventHandler(this.AddPictureToolStripMenuItem_Click);
             // 
             // addFolderToolStripMenuItem
             // 
             this.addFolderToolStripMenuItem.Name = "addFolderToolStripMenuItem";
-            this.addFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addFolderToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.addFolderToolStripMenuItem.Text = "Add Folder";
             this.addFolderToolStripMenuItem.Click += new System.EventHandler(this.AddFolderToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(144, 6);
             // 
             // saveChangesToolStripMenuItem
             // 
             this.saveChangesToolStripMenuItem.Name = "saveChangesToolStripMenuItem";
-            this.saveChangesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveChangesToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.saveChangesToolStripMenuItem.Text = "Save Changes";
             this.saveChangesToolStripMenuItem.Click += new System.EventHandler(this.SaveChangesToolStripMenuItem_Click);
+            // 
+            // paginatedView1
+            // 
+            this.paginatedView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.paginatedView1.Location = new System.Drawing.Point(0, 47);
+            this.paginatedView1.Name = "paginatedView1";
+            this.paginatedView1.Size = new System.Drawing.Size(861, 455);
+            this.paginatedView1.TabIndex = 2;
             // 
             // PictureViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(861, 502);
-            this.Controls.Add(this.ImageSelector);
+            this.Controls.Add(this.paginatedView1);
             this.Controls.Add(this.SearchControls);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -162,8 +159,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.FlowLayoutPanel ImageSelector;
         private System.Windows.Forms.ImageList imageList1;
         private System.Windows.Forms.RichTextBox SearchBox;
         private System.Windows.Forms.Panel SearchControls;
@@ -174,6 +169,7 @@
         private System.Windows.Forms.ToolStripMenuItem addFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem saveChangesToolStripMenuItem;
+        private PaginatedView paginatedView1;
     }
 }
 

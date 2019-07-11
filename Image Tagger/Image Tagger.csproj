@@ -71,6 +71,12 @@
   <ItemGroup>
     <Compile Include="Database.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="PaginatedView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PaginatedView.Designer.cs">
+      <DependentUpon>PaginatedView.cs</DependentUpon>
+    </Compile>
     <Compile Include="PictureRecord.cs" />
     <Compile Include="PictureViewer.cs">
       <SubType>Form</SubType>
@@ -87,6 +93,9 @@
       <DependentUpon>RecordEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="SearchFilter.cs" />
+    <EmbeddedResource Include="PaginatedView.resx">
+      <DependentUpon>PaginatedView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PictureViewer.resx">
       <DependentUpon>PictureViewer.cs</DependentUpon>
     </EmbeddedResource>

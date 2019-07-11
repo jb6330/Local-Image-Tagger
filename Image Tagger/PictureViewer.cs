@@ -20,8 +20,6 @@
         private ContextMenuStrip contextMenu;
         private string contextMenuPath = string.Empty;
 
-        private Dictionary<PictureBox, PictureRecord> reverseLookup = new Dictionary<PictureBox, PictureRecord>();
-
         /// <summary>Initializes a new instance of the <see cref="PictureViewer"/> class.</summary>
         public PictureViewer()
         {
@@ -36,39 +34,36 @@
             edit.Name = "Edit";
 
             this.contextMenu = new ContextMenuStrip();
+            this.paginatedView1.ContextMenuStrip = this.contextMenu;
             this.contextMenu.Opening += this.ContextMenu_Opening;
             this.contextMenu.Items.Add(copyPath);
             this.contextMenu.Items.Add(edit);
 
             this.database = new Database();
             this.database.LoadRecords(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.xml"));
-            foreach (var record in this.database.PictureRecords.Values)
-            {
-                this.AddRecord(record);
-            }
+            this.paginatedView1.DisplayItems(this.database.PictureRecords.Values.ToList());
         }
 
         private void Edit_Click(object sender, EventArgs e)
         {
-            if (this.contextMenu.SourceControl is PictureBox picture)
+            if (this.contextMenu.SourceControl is PictureBox picture && picture.Tag is Guid id)
             {
                 Form popup = new Form();
                 RecordEditor editor = new RecordEditor();
-                editor.LoadRecord(this.reverseLookup[picture]);
+                editor.LoadRecord(this.database.PictureRecords[id]);
                 editor.Dock = DockStyle.Fill;
                 popup.Controls.Add(editor);
                 popup.ShowDialog();
                 var newRecord = editor.GetChanges();
-                this.reverseLookup[picture] = newRecord;
                 this.database.UpdateRecord(newRecord);
             }
         }
 
         private void ContextMenu_Opening(object sender, CancelEventArgs e)
         {
-            if (this.contextMenu.SourceControl is PictureBox picture)
+            if (this.contextMenu.SourceControl is PictureBox picture && picture.Tag is Guid id)
             {
-                this.contextMenuPath = this.reverseLookup[picture].FileLocation;
+                this.contextMenuPath = this.database.PictureRecords[id].FileLocation;
             }
             else
             {
@@ -76,7 +71,7 @@
             }
         }
 
-        private void AddRecord(PictureRecord record)
+        /*private void AddRecord(PictureRecord record)
         {
             PictureBox pictureBox = new PictureBox
             {
@@ -91,7 +86,7 @@
 
             this.toolTip.SetToolTip(pictureBox, string.Join(", ", record.Tags.OrderBy(tag => tag)));
             this.ImageSelector.Controls.Add(pictureBox);
-        }
+        }*/
 
         private void CopyPath_Click(object sender, EventArgs e)
         {
@@ -101,25 +96,19 @@
         // TODO: split this off into a separate thread
         private void Search(string text)
         {
-            this.ImageSelector.Controls.Clear();
-            this.reverseLookup.Clear();
             text = text.Trim();
+            List<PictureRecord> recordsToDisplay;
 
             if (text == string.Empty)
             {
-                foreach (var entry in this.database.PictureRecords.Values)
-                {
-                    this.AddRecord(entry);
-                }
+                recordsToDisplay = this.database.PictureRecords.Values.ToList();
             }
             else
             {
-                var records = this.filter.CreateFilteredList(this.database.PictureRecords.Values.ToList(), text);
-                foreach (var entry in records)
-                {
-                    this.AddRecord(entry);
-                }
+                recordsToDisplay = this.filter.CreateFilteredList(this.database.PictureRecords.Values.ToList(), text);
             }
+
+            this.paginatedView1.DisplayItems(recordsToDisplay);
         }
 
         private void Button1_Click(object sender, EventArgs eventArgs)
@@ -144,8 +133,8 @@
             {
                 try
                 {
-                    var record = this.database.AddPicture(dialog.FileName);
-                    this.AddRecord(record);
+                    this.database.AddPicture(dialog.FileName);
+                    this.Search(this.SearchBox.Text);
                 }
                 catch (Exception)
                 {
@@ -160,12 +149,7 @@
             if (dialog.ShowDialog() == DialogResult.OK && dialog.SelectedPath.Trim() != string.Empty)
             {
                 this.database.AddFolder(dialog.SelectedPath);
-                this.ImageSelector.Controls.Clear();
-                this.reverseLookup.Clear();
-                foreach (var record in this.database.PictureRecords.Values)
-                {
-                    this.AddRecord(record);
-                }
+                this.Search(this.SearchBox.Text);
             }
         }
 
