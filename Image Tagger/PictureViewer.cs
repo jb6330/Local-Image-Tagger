@@ -29,6 +29,10 @@
             copyPath.Click += this.CopyPath_Click;
             copyPath.Name = "CopyPath";
 
+            ToolStripMenuItem copyFile = new ToolStripMenuItem("Copy File");
+            copyFile.Click += this.CopyFile_Click;
+            copyFile.Name = "CopyFile";
+
             ToolStripMenuItem edit = new ToolStripMenuItem("Edit");
             edit.Click += this.Edit_Click;
             edit.Name = "Edit";
@@ -37,11 +41,22 @@
             this.paginatedView1.ContextMenuStrip = this.contextMenu;
             this.contextMenu.Opening += this.ContextMenu_Opening;
             this.contextMenu.Items.Add(copyPath);
+            this.contextMenu.Items.Add(copyFile);
+            this.contextMenu.Items.Add(new ToolStripSeparator());
             this.contextMenu.Items.Add(edit);
 
             this.database = new Database();
             this.database.LoadRecords(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.xml"));
             this.paginatedView1.DisplayItems(this.database.PictureRecords.Values.ToList());
+        }
+
+        private void CopyFile_Click(object sender, EventArgs e)
+        {
+            if (this.contextMenu.SourceControl is PictureBox picture && picture.Tag is Guid id)
+            {
+                var record = this.database.PictureRecords[id];
+                Clipboard.SetData(DataFormats.FileDrop, new string[] { record.FileLocation });
+            }
         }
 
         private void Edit_Click(object sender, EventArgs e)
