@@ -66,11 +66,24 @@
 
                 pictureBox.ContextMenuStrip = this.ContextMenuStrip;
                 pictureBox.Tag = record.Id;
+
+                pictureBox.MouseDown += this.PictureBox_MouseDown;
+
                 this.toolTip.SetToolTip(pictureBox, string.Join(", ", record.Tags.OrderBy(tag => tag)));
                 this.display.Controls.Add(pictureBox);
             }
 
             this.PageNumberLabel.Text = $"{page + 1}/{Math.Ceiling((double)this.allRecords.Count / PerPage)}";
+        }
+
+        private void PictureBox_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (sender is PictureBox pictureBox)
+            {
+                pictureBox.DoDragDrop(
+                    new DataObject(DataFormats.FileDrop, new string[] { pictureBox.ImageLocation }),
+                    DragDropEffects.Copy | DragDropEffects.Move);
+            }
         }
 
         private void Previous_Click(object sender, EventArgs e)
