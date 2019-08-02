@@ -78,7 +78,7 @@
 
         private void PictureBox_MouseDown(object sender, MouseEventArgs e)
         {
-            if (sender is PictureBox pictureBox)
+            if (sender is PictureBox pictureBox && e.Button == MouseButtons.Left)
             {
                 pictureBox.DoDragDrop(
                     new DataObject(DataFormats.FileDrop, new string[] { pictureBox.ImageLocation }),
